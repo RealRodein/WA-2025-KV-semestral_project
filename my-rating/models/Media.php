@@ -7,9 +7,9 @@ class Media {
     }
 
     // Create a new media entry
-    public function create($title, $description, $genre, $type, $year, $image_url, $banner_url, $user_id = null) {
-        $sql = "INSERT INTO media (title, description, genre, type, year, image_url, banner_url, created_by)
-                VALUES (:title, :description, :genre, :type, :year, :image_url, :banner_url, :created_by)";
+    public function create($title, $description, $genre, $type, $year, $image_url, $banner_url, $user_id = null, $related = null, $author = null, $duration = null, $episode_count = null) {
+        $sql = "INSERT INTO media (title, description, genre, type, year, image_url, banner_url, created_by, related, author, duration, episode_count)
+                VALUES (:title, :description, :genre, :type, :year, :image_url, :banner_url, :created_by, :related, :author, :duration, :episode_count)";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':title' => $title,
@@ -19,7 +19,11 @@ class Media {
             ':year' => $year,
             ':image_url' => $image_url,
             ':banner_url' => $banner_url,
-            ':created_by' => null // always NULL for now
+            ':created_by' => null, // always NULL for now
+            ':related' => $related,
+            ':author' => $author,
+            ':duration' => $duration,
+            ':episode_count' => $episode_count
         ]);
     }
 

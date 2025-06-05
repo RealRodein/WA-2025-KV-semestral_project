@@ -1,4 +1,3 @@
-/* Media Banner - Details site*/
 .media-banner {
     width: 100%;
     height: 280px;
@@ -61,6 +60,22 @@
     flex: 1 1 0;
     padding-top: 0.5rem;
     margin-left: 2rem;
+}
+
+.mean-score-overlay {
+    position: absolute;
+    bottom: -38px; /* moves it below the bar */
+    right: 170px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 10px 20px;
+    border:#222 3px solid;
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+    z-index: 5;
+    white-space: nowrap;
 }
 
 .media-details-panel {

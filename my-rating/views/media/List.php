@@ -13,7 +13,10 @@ if (!isset($mediaList) || !isset($filterOptions)) {
     <meta charset="UTF-8">
     <title>Moje-Hodnocení</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/style.css">
+    <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/layout.css">
+    <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/filter-bar.css">
+    <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/media-grid.css">
+    <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/media-cards.css">
 </head>
 <body>
     <div class="header">
@@ -75,9 +78,15 @@ if (!isset($mediaList) || !isset($filterOptions)) {
                     </div>
                 <?php else: ?>
                     <?php foreach ($mediaList as $item): ?>
-                        <a href="/WA-2025-KV-semestral_project/my-rating/views/media/detail.php?id=<?= urlencode($item['id']) ?>" class="media-card-link" style="text-decoration:none;color:inherit;">
+                        <a href="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=<?= urlencode($item['id']) ?>" class="media-card-link" style="text-decoration:none;color:inherit;">
                             <div class="media-card">
-                                <img src="<?= htmlspecialchars($item['image_url']) ?>" alt="<?= htmlspecialchars($item['title']) ?>">
+                                <div class="media-poster-hoverbox">
+                                    <img src="<?= htmlspecialchars($item['image_url']) ?>" alt="<?= htmlspecialchars($item['title']) ?>">
+                                    <div class="media-poster-overlay"></div>
+                                    <div class="media-poster-rating">
+                                        <?= isset($item['weighted_rating']) ? htmlspecialchars($item['weighted_rating']) . '/10' : '' ?>
+                                    </div>
+                                </div>
                                 <div class="media-title"><?= htmlspecialchars($item['title']) ?></div>
                             </div>
                         </a>

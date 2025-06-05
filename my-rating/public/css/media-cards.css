@@ -12,7 +12,7 @@
 }
 
 .media-card:hover {
-    transform: translateY(-4px) scale(1.03);
+    transform: scale(1.03);
     border-color: #222;
 }
 
@@ -49,4 +49,84 @@
 .media-title.related-media-title {
     font-size: 0.8rem;
     max-width: 90px;
+}
+
+.media-poster-hoverbox {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.media-poster-hoverbox img {
+    display: block;
+    width: 100%;
+    border-radius: 16px;
+    transition: transform 0.2s;
+}
+
+.media-poster-overlay,
+.media-poster-rating {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.media-poster-overlay {
+    background: rgba(20, 20, 20, 0.65);
+    z-index: 1;
+    border-radius: 10px;
+}
+
+.media-poster-rating {
+    z-index: 2;
+    color: #fff;
+    font-size: 3rem;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    background: rgba(30,30,30,0.7);
+    border-radius: 16px;
+    padding: 12px 32px;
+    width: auto;
+    height: auto;
+    margin: auto;
+}
+
+.media-poster-rating-related {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 2;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    background: rgba(30,30,30,0.7);
+    border-radius: 16px;
+    padding: 12px 32px;
+    width: auto;
+    height: auto;
+    margin: auto;
+}
+
+.media-poster-hoverbox:hover img {
+    transform: scale(1.03);
+}
+
+.media-poster-hoverbox:hover .media-poster-overlay,
+.media-poster-hoverbox:hover .media-poster-rating {
+    opacity: 1;
+}
+
+.media-poster-hoverbox:hover .media-poster-rating-related {
+    opacity: 1;
 }

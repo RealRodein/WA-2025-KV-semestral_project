@@ -22,6 +22,10 @@ class UserController {
                 $this->LoginUser();
             } elseif ($action === 'logout') {
                 $this->LogoutUser();
+            } elseif ($action === 'media') {
+                $this->listUserMedia();
+            } elseif ($action === 'comments') {
+                $this->listUserComments();
             } else {
                 echo "Invalid action.";
             }
@@ -79,6 +83,34 @@ class UserController {
         session_destroy(); // Destroy the session
         header("Location: ../controllers/MediaController.php"); // Redirect to login page
         exit();
+    }
+
+    private function listUserMedia() {
+        if (!isset($_GET['user_id'])) {
+            echo "User ID not specified.";
+            return;
+        }
+        $user_id = intval($_GET['user_id']);
+        require_once '../models/Media.php';
+        $mediaModel = new Media($this->db);
+        $mediaList = $mediaModel->getByUserId($user_id);
+
+        // You can include a view here to display the media
+        include '../views/user/UserMedia.php';
+    }
+
+    private function listUserComments() {
+        if (!isset($_GET['user_id'])) {
+            echo "User ID not specified.";
+            return;
+        }
+        $user_id = intval($_GET['user_id']);
+        require_once '../models/Comment.php';
+        $commentModel = new Comment($this->db);
+        $commentList = $commentModel->getByUserId($user_id);
+
+        // You can include a view here to display the comments
+        include '../views/user/UserComments.php';
     }
 }
 
