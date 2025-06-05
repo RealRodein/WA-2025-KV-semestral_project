@@ -1,0 +1,94 @@
+/* Media Banner - Details site*/
+.media-banner {
+    width: 100%;
+    height: 280px;
+    position: relative;
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: 1;
+}
+.media-banner .media-banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.227);
+    z-index: 2;
+}
+
+.media-info-bar {
+    width: 100%;
+    background: #1b1b1b; /* Same as .header */
+    color: #fff;
+    border-bottom: 2px solid #0b0b0b;
+    position: relative;
+    z-index: 3;
+    padding-bottom: 24px;
+    padding-top: 0;
+    padding: 0 170px;
+}
+
+@media (max-width: 900px) {
+  .media-info-bar {
+    padding: 20px;
+  }
+}
+
+.media-info-flex {
+    display: flex;
+    align-items: flex-start;
+    margin: 0 auto;
+    position: relative;
+}
+
+.media-info-poster {
+    flex: 0 0 auto;
+    margin-top: -80px; /* Overlap the banner */
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #222;
+}
+
+.media-info-poster img {
+    width: 200px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+}
+
+.media-info-content {
+    flex: 1 1 0;
+    padding-top: 0.5rem;
+    margin-left: 2rem;
+}
+
+.media-details-panel {
+    width: 200px;
+    background: #222;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    padding: 20px 24px;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.media-details-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.media-details-label {
+    width: 100%;
+    color: #fff;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.media-details-value {
+    color: #ccc;
+    font-weight: 400;
+    width: 100%;
+}

@@ -1,0 +1,52 @@
+.media-card {
+    width: 220px;
+    background: #181818;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    text-align: center;
+    padding: 0.6rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.media-card:hover {
+    transform: translateY(-4px) scale(1.03);
+    border-color: #222;
+}
+
+.media-card img {
+    width: 200px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.media-card.related-media-card {
+    width: 110px;
+    padding: 0.3rem 0.25rem;
+}
+
+.media-card.related-media-card img {
+    width: 100px;
+    height: 140px;
+    border-radius: 6px;
+    margin-bottom: 0.3rem;
+}
+
+.media-title {
+    margin-top: 1rem;
+    color: #fff;
+    font-size: 1.5rem;
+    text-align: left;
+    width: 100%;
+    max-width: 180px;
+}
+
+.media-title.related-media-title {
+    font-size: 0.8rem;
+    max-width: 90px;
+}

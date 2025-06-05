@@ -1,0 +1,40 @@
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    margin: 0 auto; /* Center the filter bar */
+    max-width: 100%; /* Prevent it from exceeding the container width */
+}
+
+.filter-bar .form-control,
+.filter-bar .form-select {
+    flex: 1;
+    min-width: 150px;
+    background-color: #1b1b1b; /* Match navbar background color */
+    color: #fff; /* Text color */
+    border: 1px solid #222; /* Border color */
+    padding: 10px;
+    border-radius: 5px; /* Rounded corners */
+}
+
+.filter-bar .form-control::placeholder,
+.filter-bar .form-select option {
+    color: #fff; /* Placeholder and option text color */
+}
+
+.filter-bar .btn {
+    flex-shrink: 0;
+    background-color: #1b1b1b; /* Match navbar background color */
+    color: #fff; /* Button text color */
+    border: 1px solid #222; /* Border color */
+    padding: 10px 20px;
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.filter-bar .btn:hover {
+    background-color: #fff; /* Hover background color */
+    color: #1b1b1b; /* Hover text color */
+}
