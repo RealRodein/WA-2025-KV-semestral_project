@@ -1,3 +1,4 @@
+/*hlavni styly pro layout aplikace*/
 body {
   margin: 0;
   background-color: #111;
@@ -60,11 +61,12 @@ body {
 
 .header .user {
   display: flex;
-  justify-content: flex-end;
-  gap: 20px;
-  color: #fff;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   text-decoration: none;
-  cursor: pointer;
+  color: #fff;
 }
 
 .burger-menu {
@@ -106,7 +108,17 @@ body {
   background: #232323;
 }
 
-
+.burger-menu .burger-username {
+  font-weight: bold;
+  display: block;
+  padding: 12px 24px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+  word-break: break-word;
+}
 
 body.select-edit-mode .header .menu a#edit-mode-btn,
 body.select-delete-mode .header .menu a#delete-mode-btn {
@@ -118,7 +130,32 @@ body.select-delete-mode .media-card-link {
   cursor: pointer;
 }
 
-/* Responsive styles */
+#burger-menu-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.logout-btn {
+    color: #fed500;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    white-space: nowrap;
+}
+.login-btn {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+}
+.register-btn {
+    color: #fed500;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+}
+
+/* responsivni styly */
 @media (min-width: 901px) {
   .hamburger {
     display: none !important;
@@ -127,6 +164,13 @@ body.select-delete-mode .media-card-link {
   .header .menu,
   .header .user {
     display: flex !important;
+  }
+
+  .header .user {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
   }
 }
 

@@ -74,8 +74,10 @@ include __DIR__ . '/../../public/navbar.php';
                         <option value="Comedy">Komedie</option>
                         <option value="Drama">Drama</option>
                         <option value="Fantasy">Fantasy</option>
-                        <option value="Romance">Romantika</option>
+                        <option value="Romantic">Romantika</option>
                         <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Mystery">Mysteriózní</option>
+                        <option value="Thriller">Thriller</option>
                     </select>
                     <small class="text-secondary">Vyberte jeden nebo více žánrů.</small>
                 </div>
@@ -94,6 +96,43 @@ include __DIR__ . '/../../public/navbar.php';
                     </select>
                     <small class="text-secondary">Vyberte jedno nebo více médií (volitelné).</small>
                 </div>
+
+                <div class="mb-3">
+                    <label for="author" class="form-label">Autor</label>
+                    <input type="text" id="author" name="author"
+                        class="form-control bg-dark text-light border-secondary">
+                </div>
+
+                <div class="mb-3">
+                    <label for="duration" class="form-label">Délka (minuty)</label>
+                    <input type="number" id="duration" name="duration"
+                        class="form-control bg-dark text-light border-secondary" min="1">
+                </div>
+
+                <div class="mb-3">
+                    <label for="episode_count" class="form-label">Počet epizod</label>
+                    <input type="number" id="episode_count" name="episode_count"
+                        class="form-control bg-dark text-light border-secondary" min="1">
+                </div>
+
+                <script>
+                // nastav episode_count na 1 pokud je typ 'film'
+                document.addEventListener('DOMContentLoaded', function() {
+                    const typeSelect = document.getElementById('type');
+                    const episodeInput = document.getElementById('episode_count');
+                    function updateEpisodeCount() {
+                        if (typeSelect.value === 'film') {
+                            episodeInput.value = 1;
+                            episodeInput.readOnly = true;
+                        } else {
+                            episodeInput.value = '';
+                            episodeInput.readOnly = false;
+                        }
+                    }
+                    typeSelect.addEventListener('change', updateEpisodeCount);
+                    updateEpisodeCount();
+                });
+                </script>
 
                 <button type="submit" class="btn btn-success w-100">Uložit</button>
             </form>

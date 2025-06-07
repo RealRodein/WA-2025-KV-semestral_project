@@ -3,23 +3,15 @@ session_start();
 require_once '../../models/Database.php';
 require_once '../../models/Media.php';
 
-// Get user and media ID from GET or POST
+// ziskani user a media id
 $user = $_SESSION['user'] ?? null;
 $mediaId = isset($_GET['id']) ? intval($_GET['id']) : (isset($_POST['id']) ? intval($_POST['id']) : null);
-
-// Permission check function
-function canEditMedia($user, $mediaId, $mediaModel) {
-    if (!$user || !$mediaId) return false;
-    $media = $mediaModel->getById($mediaId);
-    if (!$media) return false;
-    return $user['role'] === 'admin' || $user['role'] === 'trusted' || $media['user_id'] == $user['id'];
-}
 
 $db = (new Database())->getConnection();
 $mediaModel = new Media($db);
 
 
-// Fetch media and all media for related select
+// fetchovani medii a vsech souvisejicich
 $media = $mediaModel->getById($mediaId);
 $allMedia = $mediaModel->getAll();
 ?>
@@ -107,6 +99,8 @@ include __DIR__ . '/../../public/navbar.php';
                         <option value="Fantasy" <?= in_array('Fantasy', $selectedGenres) ? 'selected' : '' ?>>Fantasy</option>
                         <option value="Romance" <?= in_array('Romance', $selectedGenres) ? 'selected' : '' ?>>Romantika</option>
                         <option value="Sci-Fi" <?= in_array('Sci-Fi', $selectedGenres) ? 'selected' : '' ?>>Sci-Fi</option>
+                        <option value="Thriller" <?= in_array('Thriller', $selectedGenres) ? 'selected' : '' ?>>Thriller</option>
+                        <option value="Mystery" <?= in_array('Mystery', $selectedGenres) ? 'selected' : '' ?>>Mysteriózní</option>
                     </select>
                     <small class="text-secondary">Pro výběr vícera podržte Ctrl.</small>
                 </div>
@@ -125,6 +119,45 @@ include __DIR__ . '/../../public/navbar.php';
                     </select>
                     <small class="text-secondary">Pro výběr vícera podržte Ctrl.</small>
                 </div>
+
+                <div class="mb-3">
+                    <label for="author" class="form-label">Autor</label>
+                    <input type="text" id="author" name="author"
+                        class="form-control bg-dark text-light border-secondary"
+                        value="<?= htmlspecialchars($media['author'] ?? '') ?>">
+                </div>
+
+                <div class="mb-3">
+                    <label for="duration" class="form-label">Délka (minuty)</label>
+                    <input type="number" id="duration" name="duration"
+                        class="form-control bg-dark text-light border-secondary" min="1"
+                        value="<?= htmlspecialchars($media['duration'] ?? '') ?>">
+                </div>
+
+                <div class="mb-3">
+                    <label for="episode_count" class="form-label">Počet epizod</label>
+                    <input type="number" id="episode_count" name="episode_count"
+                        class="form-control bg-dark text-light border-secondary" min="1"
+                        value="<?= htmlspecialchars($media['episode_count'] ?? '') ?>">
+                </div>
+
+                <script>
+                // nastav episode_count na 1 pokud je typ 'film'
+                document.addEventListener('DOMContentLoaded', function() {
+                    const typeSelect = document.getElementById('type');
+                    const episodeInput = document.getElementById('episode_count');
+                    function updateEpisodeCount() {
+                        if (typeSelect.value === 'film') {
+                            episodeInput.value = 1;
+                            episodeInput.readOnly = true;
+                        } else {
+                            episodeInput.readOnly = false;
+                        }
+                    }
+                    typeSelect.addEventListener('change', updateEpisodeCount);
+                    updateEpisodeCount();
+                });
+                </script>
 
                 <button type="submit" class="btn btn-success w-100">Uložit</button>
             </form>

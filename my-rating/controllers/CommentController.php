@@ -1,7 +1,8 @@
 <?php
+session_start();
+session_regenerate_id(true);
 require_once '../models/Database.php';
 require_once '../models/Comment.php';
-session_start();
 
 class CommentController {
     private $db;
@@ -24,12 +25,6 @@ class CommentController {
                     break;
                 case 'delete':
                     $this->delete();
-                    break;
-                case 'upvote':
-                    $this->upvote();
-                    break;
-                case 'downvote':
-                    $this->downvote();
                     break;
                 default:
                     echo "Invalid action.";
@@ -59,7 +54,7 @@ class CommentController {
             if ($content) {
                 $this->commentModel->update($comment_id, $content, $rating, $_SESSION['user']['id']);
             }
-            // Redirect back to media detail or wherever appropriate
+            // presmerovani zpet na detail media nebo kamkoli je potreba
             header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=" . urlencode($_POST['media_id']));
             exit;
         }
@@ -74,38 +69,19 @@ class CommentController {
                 header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=" . urlencode($media_id));
                 exit;
             } else {
-                // Invalid IDs, redirect safely
+                // neplatne id, bezpecne presmerovani
                 header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php");
                 exit;
             }
         } else {
-            // Missing parameters or not logged in
+            // chybi parametry nebo uzivatel neni prihlasen
             header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php");
             exit;
         }
     }
 
-    private function upvote() {
-        if (isset($_GET['comment_id']) && isset($_SESSION['user'])) {
-            $comment_id = intval($_GET['comment_id']);
-            $media_id = isset($_GET['media_id']) ? intval($_GET['media_id']) : 0;
-            $this->commentModel->upvote($comment_id, $_SESSION['user']['id']);
-            header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=" . urlencode($media_id));
-            exit;
-        }
-    }
-
-    private function downvote() {
-        if (isset($_GET['comment_id']) && isset($_SESSION['user'])) {
-            $comment_id = intval($_GET['comment_id']);
-            $media_id = isset($_GET['media_id']) ? intval($_GET['media_id']) : 0;
-            $this->commentModel->downvote($comment_id, $_SESSION['user']['id']);
-            header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=" . urlencode($media_id));
-            exit;
-        }
-    }
 }
 
-// Instantiate the controller and handle the action
+// vytvoreni controlleru a zpracovani akce
 $controller = new CommentController();
 $controller->handleAction();

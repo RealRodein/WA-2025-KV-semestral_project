@@ -1,4 +1,5 @@
 <?php 
+// trida pro praci s uzivateli
 class User { 
     private $db;
     public string $username;
@@ -12,18 +13,17 @@ class User {
         $this->db = $db;
     }
 
-    // Create a new user
-    public function create($username, $email, $password_hash, $role = 'user', $profile_picture = null) {
+    // vytvori noveho uzivatele
+    public function create($username, $email, $password_hash, $role = 'user') {
         if ($this->checkUniqueUsername($username)) {
-            $sql = "INSERT INTO users (username, email, password_hash, role, created_at, profile_picture)
-                VALUES (:username, :email, :password_hash, :role, NOW(), :profile_picture)";
+            $sql = "INSERT INTO users (username, email, password_hash, role, created_at)
+                VALUES (:username, :email, :password_hash, :role, NOW())";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
                 ':username' => $username,
                 ':email' => $email,
                 ':password_hash' => $password_hash,
                 ':role' => $role,
-                ':profile_picture' => $profile_picture,
             ]);
         } else {
             session_start();
@@ -35,21 +35,23 @@ class User {
         }
     }
 
+    // true pokud je username unikatni, false pokud existuje
     public function checkUniqueUsername($username) {
         $sql = "SELECT * FROM users WHERE username = :username";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':username' => $username]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) === false; // true if unique, false if exists
+        return $stmt->fetch(PDO::FETCH_ASSOC) === false; // true pokud je unikatni, false pokud existuje
     }
 
+    // vrati uzivatele podle username nebo false pokud nenalezen
     public function getByUsername($username) {
         $sql = "SELECT * FROM users WHERE username = :username";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':username' => $username]);
-        return $stmt->fetch(PDO::FETCH_ASSOC); // Return the user data or false if not found
+        return $stmt->fetch(PDO::FETCH_ASSOC); // vrati data uzivatele nebo false pokud nenalezen
     }
 
-    // Get all users
+    // vrati vsechny uzivatele
     public function getAll() {
         $sql = "SELECT * FROM users ORDER BY id ASC";
         $stmt = $this->db->prepare($sql);

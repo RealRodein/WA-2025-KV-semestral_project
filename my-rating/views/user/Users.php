@@ -1,9 +1,10 @@
 <?php
 session_start();
+session_regenerate_id(true);
 require_once '../../models/Database.php';
 require_once '../../models/User.php';
 
-// Only allow admin
+// povoleni pouze pro adminy
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: /WA-2025-KV-semestral_project/my-rating/views/media/List.php');
     exit();
@@ -13,7 +14,6 @@ $db = (new Database())->getConnection();
 $userModel = new User($db);
 $users = $userModel->getAll();
 
-// Handle feedback messages
 $message = $_GET['message'] ?? null;
 $error = $_GET['error'] ?? null;
 ?>
@@ -31,6 +31,9 @@ $navbarContext = 'list';
 include __DIR__ . '/../../public/navbar.php';
 ?>
     <div class="main-wrapper">
+
+    <div class="sidebar"></div>
+
         <div class="content">
             <h2 class="mb-4 text-center">Správa uživatelů</h2>
             <?php if ($message): ?>
@@ -52,7 +55,6 @@ include __DIR__ . '/../../public/navbar.php';
                 <tbody>
                 <?php foreach ($users as $u): ?>
                     <?php
-                        // If this user was just edited and failed, prefill with attempted values
                         $editId = $_GET['id'] ?? null;
                         $editEmail = $_GET['email'] ?? null;
                         $editRole = $_GET['role'] ?? null;
@@ -88,6 +90,9 @@ include __DIR__ . '/../../public/navbar.php';
                 </tbody>
             </table>
         </div>
+
+        <div class="sidebar"></div>
+
     </div>
 </body>
 </html>

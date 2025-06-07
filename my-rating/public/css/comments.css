@@ -1,4 +1,4 @@
-/* Comments Section */
+/* komentare */
 .comments-section {
     margin-top: 10px;
     background: #222;
@@ -21,6 +21,7 @@
 .comment-form button {
     background: #fed500;
     color: #000000;
+    border:2px solid #111;
     border-radius: 6px;
     padding: 10px 24px;
     font-size: 1rem;
@@ -53,6 +54,16 @@
     margin-left: 10px;
     font-size: 1em;
 }
+
+.comment-card-title {
+    color: #8bc34a;
+    text-decoration: none;
+    text-align: right;
+    font-weight: bold;
+    position: static;
+    display: block;
+}
+
 
 .comment-actions {
     position: absolute;

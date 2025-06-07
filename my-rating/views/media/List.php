@@ -28,7 +28,7 @@ include __DIR__ . '/../../public/navbar.php';
         <div class="sidebar"></div>
 
         <div class="content">
-            <!-- Filter Bar -->
+            <!-- filtr -->
             <form method="GET" action="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php"
                 class="filter-bar d-flex gap-3 mb-4">
                 <input type="hidden" name="action" value="list">
@@ -44,18 +44,53 @@ include __DIR__ . '/../../public/navbar.php';
                 foreach ($filters as $filter => $placeholder): ?>
                     <select name="<?= $filter ?>" class="form-select">
                         <option value=""><?= $placeholder ?></option>
-                        <?php foreach ($filterOptions[$filter . 's'] as $option): ?>
-                            <option value="<?= htmlspecialchars($option) ?>" <?= (isset($_GET[$filter]) && $_GET[$filter] == $option ? ' selected' : '') ?>>
-                                <?= htmlspecialchars($option) ?>
-                            </option>
-                        <?php endforeach; ?>
+                        <?php if ($filter === 'type'): ?>
+                            <?php
+                            $typeOptions = [
+                                'film' => 'Film',
+                                'series' => 'Seriál',
+                                'anime' => 'Anime',
+                            ];
+                            foreach ($typeOptions as $value => $label): ?>
+                                <option value="<?= htmlspecialchars($value) ?>" <?= (isset($_GET[$filter]) && $_GET[$filter] == $value ? ' selected' : '') ?>>
+                                    <?= htmlspecialchars($label) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php elseif ($filter === 'genre'): ?>
+                            <?php
+                            // preklady zanru pouze pro existujici moznosti
+                            $genreTranslations = [
+                                'Action' => 'Akce',
+                                'Adventure' => 'Dobrodružný',
+                                'Comedy' => 'Komedie',
+                                'Drama' => 'Drama',
+                                'Fantasy' => 'Fantasy',
+                                'Romance' => 'Romantika',
+                                'Sci-Fi' => 'Sci-Fi',
+                                'Thriller' => 'Thriller',
+                                'Mystery' => 'Mysteriózní',
+                            ];
+                            foreach ($filterOptions['genres'] as $option):
+                                $translated = $genreTranslations[$option] ?? $option;
+                            ?>
+                                <option value="<?= htmlspecialchars($option) ?>" <?= (isset($_GET[$filter]) && $_GET[$filter] == $option ? ' selected' : '') ?>>
+                                    <?= htmlspecialchars($translated) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <?php foreach ($filterOptions[$filter . 's'] as $option): ?>
+                                <option value="<?= htmlspecialchars($option) ?>" <?= (isset($_GET[$filter]) && $_GET[$filter] == $option ? ' selected' : '') ?>>
+                                    <?= htmlspecialchars($option) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </select>
                 <?php endforeach; ?>
 
                 <button type="submit" class="btn btn-primary">Filtrovat</button>
             </form>
 
-            <!-- Display Filtered Media -->
+            <!--  zobrazeni filtrovanych medii -->
             <div class="media-grid">
                 <?php if (empty($mediaList)): ?>
                     <div class="w-100 text-center text-secondary py-5" style="grid-column: 1 / -1;">
@@ -64,28 +99,33 @@ include __DIR__ . '/../../public/navbar.php';
                 <?php else: ?>
                     <?php foreach ($mediaList as $item): ?>
                         <?php
-                            $canDelete = false;
-                            // Use created_by for permission check
-                            $itemUserId = isset($item['created_by']) ? $item['created_by'] : (isset($item['user_id']) ? $item['user_id'] : null);
-                            if (isset($_SESSION['user'])) {
-                                $role = $_SESSION['user']['role'];
-                                $userId = $_SESSION['user']['id'];
-                                if ($role === 'admin') {
-                                    $canDelete = true;
-                                } elseif ($role === 'trusted' || $role === 'user') {
-                                    $canDelete = $itemUserId !== null && $itemUserId == $userId;
-                                }
+                        $canDelete = false;
+                        $itemUserId = isset($item['created_by']) ? $item['created_by'] : null;
+                        if (isset($_SESSION['user'])) {
+                            $role = $_SESSION['user']['role'];
+                            $userId = $_SESSION['user']['id'];
+                            if ($role === 'admin') {
+                                $canDelete = true;
+                            } elseif ($role === 'trusted' || $role === 'user') {
+                                $canDelete = ($itemUserId !== null && $itemUserId == $userId);
                             }
+                        }
                         ?>
                         <a href="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=<?= urlencode($item['id']) ?>"
-                            class="media-card-link" data-can-delete="<?= $canDelete ? '1' : '0' ?>" style="text-decoration:none;color:inherit;">
-                            <div class="media-card<?= $canDelete ? ' can-delete' : '' ?>">
+                            class="media-card-link" data-can-delete="<?= $canDelete ? '1' : '0' ?>" style="text-decoration:none;color:inherit;<?= ($canDelete ? '' : '') ?>">
+                            <div class="media-card">
                                 <div class="media-poster-hoverbox">
                                     <img src="<?= htmlspecialchars($item['image_url']) ?>"
                                         alt="<?= htmlspecialchars($item['title']) ?>">
                                     <div class="media-poster-overlay"></div>
                                     <div class="media-poster-rating">
-                                        <?= isset($item['weighted_rating']) ? htmlspecialchars($item['weighted_rating']) . '/10' : '' ?>
+                                        <?php if (isset($item['weighted_rating'])): ?>
+                                            <?php
+                                            $rounded = number_format($item['weighted_rating'], 1);
+                                            $display = ($rounded == intval($rounded)) ? intval($rounded) : $rounded;
+                                            ?>
+                                            <?= $display ?>/10
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 <div class="media-title"><?= htmlspecialchars($item['title']) ?></div>
@@ -100,8 +140,6 @@ include __DIR__ . '/../../public/navbar.php';
     </div>
 </body>
 
-<style>
-</style>
 <script>
 (function() {
     let selectMode = null;
@@ -110,10 +148,49 @@ include __DIR__ . '/../../public/navbar.php';
     const editBurger = document.getElementById('edit-mode-btn-burger');
     const deleteBurger = document.getElementById('delete-mode-btn-burger');
 
+    function handleCardClick(e) {
+        if (!selectMode) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const link = e.currentTarget;
+        const url = new URL(link.href, window.location.origin);
+        const id = url.searchParams.get('id');
+        if (selectMode === 'edit' && id) {
+            window.location.href = '/WA-2025-KV-semestral_project/my-rating/views/media/Edit.php?id=' + encodeURIComponent(id);
+        } else if (selectMode === 'delete' && id) {
+            if (confirm('Opravdu chcete smazat toto médium?')) {
+                window.location.href = '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=delete&id=' + encodeURIComponent(id);
+            }
+        }
+        setSelectMode(null);
+    }
+
+    function attachCardHandlers() {
+        document.querySelectorAll('.media-card-link').forEach(link => {
+            link.removeEventListener('click', handleCardClick, false);
+            if (selectMode === 'edit' || selectMode === 'delete') {
+                link.addEventListener('click', handleCardClick, false);
+            }
+        });
+    }
+
+    function updateDeleteFilter() {
+        const isDeleteMode = document.body.classList.contains('select-delete-mode');
+        document.querySelectorAll('.media-card-link').forEach(link => {
+            const canDelete = link.getAttribute('data-can-delete') === '1';
+            if (isDeleteMode) {
+                link.style.display = canDelete ? '' : 'none';
+            } else {
+                link.style.display = '';
+            }
+        });
+    }
+
     window.setSelectMode = function(mode) {
         selectMode = mode;
         document.body.classList.toggle('select-edit-mode', mode === 'edit');
         document.body.classList.toggle('select-delete-mode', mode === 'delete');
+        attachCardHandlers();
         updateDeleteFilter();
     };
 
@@ -130,17 +207,10 @@ include __DIR__ . '/../../public/navbar.php';
     if (editBurger) editBurger.onclick = handleEdit;
     if (deleteBurger) deleteBurger.onclick = handleDelete;
 
-    function updateDeleteFilter() {
-        const isDeleteMode = document.body.classList.contains('select-delete-mode');
-        document.querySelectorAll('.media-card-link').forEach(link => {
-            const canDelete = link.getAttribute('data-can-delete') === '1';
-            if (isDeleteMode) {
-                link.style.display = canDelete ? '' : 'none';
-            } else {
-                link.style.display = '';
-            }
-        });
-    }
-    document.addEventListener('DOMContentLoaded', updateDeleteFilter);
+    document.addEventListener('DOMContentLoaded', function() {
+        attachCardHandlers();
+        updateDeleteFilter();
+    });
 })();
 </script>
+</html>

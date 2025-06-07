@@ -1,8 +1,9 @@
 <?php
 session_start();
-$form_data = $_SESSION['form_data'] ?? [];
 session_regenerate_id(true);
+$form_data = $_SESSION['form_data'] ?? [];
 unset($_SESSION['form_data']);
+require_once __DIR__ . '/../../public/navbar.php';
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -13,22 +14,6 @@ unset($_SESSION['form_data']);
     <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/layout.css">
 </head>
 <body>
-    <div class="header">
-        <a class="logo" href="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php">
-            <img src="/WA-2025-KV-semestral_project/my-rating/public/images/icon.svg" alt="Moje-Hodnocení" style="width:32px;height:32px;vertical-align:middle;">
-        </a>
-
-        <div class="menu">
-            <a href="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php">Procházet</a>
-            <a href="/WA-2025-KV-semestral_project/my-rating/views/user/Profile.php">Profil</a>
-        </div>
-        
-        <div class="user">
-            <a class="user" href="/WA-2025-KV-semestral_project/my-rating/views/auth/Login.php">Přihlášení</a>
-            <a class="user" href="/WA-2025-KV-semestral_project/my-rating/views/auth/Register.php">Registrace</a>
-        </div>
-    </div>
-
     <div class="main-wrapper">
         <div class="sidebar"></div>
 
@@ -55,3 +40,4 @@ unset($_SESSION['form_data']);
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
+</html>

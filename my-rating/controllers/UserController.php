@@ -1,4 +1,7 @@
 <?php
+session_start();
+session_regenerate_id(true);
+
 require_once '../models/Database.php';
 require_once '../models/User.php';
 
@@ -16,6 +19,7 @@ class UserController {
         if (isset($_GET['action'])) {
             $action = $_GET['action'];
 
+            // hlavni routovani akci
             if ($action === 'register') {
                 $this->CreateUser();
             } elseif ($action === 'login') {
@@ -44,9 +48,8 @@ class UserController {
                 $email = null;
             }
             $password_hash = password_hash($_POST['password'], PASSWORD_BCRYPT);
-            $role = 'user'; // Default role
+            $role = 'user'; // vychozi role
 
-            // Only pass fields that exist in your DB
             if ($this->UserModel->create($username, $email, $password_hash, $role)) {
                 header("Location: ../views/auth/Login.php");
                 exit();
@@ -63,18 +66,16 @@ class UserController {
             $username = trim(htmlspecialchars($_POST['username']));
             $password = $_POST['password'];
 
-            // Fetch user from the database using the username
             $user = $this->UserModel->getByUsername($username);
 
             if ($user && password_verify($password, $user['password_hash'])) {
-                // Start session and store user info
                 session_start();
                 $_SESSION['user'] = [
                     'id' => $user['id'],
                     'username' => $user['username'],
                     'role' => $user['role'],
                 ];
-                header("Location: ../controllers/MediaController.php"); // Redirect to dashboard or home page
+                header("Location: ../controllers/MediaController.php");
                 exit();
             } else {
                 $this->UserModel->alert('Invalid username or password.', '../views/auth/Login.php');
@@ -86,9 +87,9 @@ class UserController {
 
     private function LogoutUser() {
         session_start();
-        session_unset(); // Unset all session variables
-        session_destroy(); // Destroy the session
-        header("Location: ../controllers/MediaController.php"); // Redirect to login page
+        session_unset();
+        session_destroy();
+        header("Location: ../controllers/MediaController.php");
         exit();
     }
 
@@ -102,7 +103,6 @@ class UserController {
         $mediaModel = new Media($this->db);
         $mediaList = $mediaModel->getByUserId($user_id);
 
-        // You can include a view here to display the media
         include '../views/user/UserMedia.php';
     }
 
@@ -116,39 +116,37 @@ class UserController {
         $commentModel = new Comment($this->db);
         $commentList = $commentModel->getByUserId($user_id);
 
-        // You can include a view here to display the comments
         include '../views/user/UserComments.php';
     }
 
-    // Admin: update user email and role
+    // admin: uprava emailu a role
     public function adminUpdateUser() {
         $id = $_POST['id'] ?? null;
         $email = trim($_POST['email'] ?? '');
         $role = $_POST['role'] ?? '';
         if (!$id || !$email || !$role) {
-            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Email+a+role+jsou+povinné.&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
+            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Email+a+role+jsou+povinne.&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
             exit();
         }
         $db = $this->db;
-        // Check for duplicate email (other than this user)
         $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND id != ?');
         $stmt->execute([$email, $id]);
         if ($stmt->fetch()) {
-            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Email+je+již+použit+jinde.&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
+            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Email+je+jiz+pouzity+jinde.&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
             exit();
         }
         try {
             $stmt = $db->prepare('UPDATE users SET email = ?, role = ? WHERE id = ?');
             $stmt->execute([$email, $role, $id]);
-            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?message=Uživatel+upraven.');
+            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?message=uzivatel+upraven.');
             exit();
         } catch (PDOException $e) {
-            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Chyba+při+ukládání:+'.urlencode($e->getMessage()).'&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
+            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Chyba+pri+ukladani:+'.urlencode($e->getMessage()).'&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
             exit();
         }
     }
 
-    // Admin: delete user
+    // admin: smazani uzivatele, presun media, mazani komentaru
     private function adminDeleteUser() {
         session_start();
         if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
@@ -157,16 +155,31 @@ class UserController {
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = intval($_POST['id']);
+            // mazani komentaru uzivatele
+            $stmt = $this->db->prepare('DELETE FROM comments WHERE user_id = :id');
+            $stmt->execute([':id' => $id]);
+
+            // najdi noveho vlastnika (trusted/admin)
+            $stmt = $this->db->prepare('SELECT id FROM users WHERE (role = "admin" OR role = "trusted") AND id != :id ORDER BY id ASC LIMIT 1');
+            $stmt->execute([':id' => $id]);
+            $newOwner = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($newOwner) {
+                $newOwnerId = $newOwner['id'];
+                // presun media na noveho vlastnika
+                $stmt = $this->db->prepare('UPDATE media SET created_by = :newOwnerId WHERE created_by = :id');
+                $stmt->execute([':newOwnerId' => $newOwnerId, ':id' => $id]);
+            }
+            // smazani uzivatele
             $stmt = $this->db->prepare('DELETE FROM users WHERE id = :id');
             $stmt->execute([':id' => $id]);
-            header('Location: ../views/user/Users.php?message=Uživatel smazán');
+            header('Location: ../views/user/Users.php?message=uzivatel+smazan');
             exit();
         }
-        header('Location: ../views/user/Users.php?error=Neplatný požadavek');
+        header('Location: ../views/user/Users.php?error=neplatny+pozadavek');
         exit();
     }
 }
 
-// Instantiate the controller and handle the action
+// spusteni controlleru
 $controller = new UserController();
 $controller->handleAction();

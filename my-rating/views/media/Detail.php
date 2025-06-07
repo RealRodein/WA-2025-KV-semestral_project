@@ -1,5 +1,5 @@
 <?php
-// Expecting: $media, $relatedMedia, $comments, $mediaId
+// ocekava promenne: $media, $relatedMedia, $comments, $mediaId
 $title = $media['title'] ?? '';
 $description = $media['description'] ?? '';
 $image_url = $media['image_url'] ?? '';
@@ -50,7 +50,11 @@ $episode_count = $media['episode_count'] ?? null;
                     <p class="media-description"><?php echo htmlspecialchars($description); ?></p>
                     <?php if (isset($weightedRating) && $weightedRating !== null): ?>
                         <div class="media-mean-score">
-                            <?= $weightedRating ?>/10
+                            <?php
+                            $rounded = number_format($weightedRating, 1);
+                            $display = ($rounded == intval($rounded)) ? intval($rounded) : $rounded;
+                            ?>
+                            <?= $display ?>/10
                         </div>
                     <?php endif; ?>
                 </div>
@@ -58,7 +62,11 @@ $episode_count = $media['episode_count'] ?? null;
 
             <?php if (isset($meanScore) && $meanScore !== null): ?>
                 <div class="mean-score-overlay">
-                    <?= $meanScore ?>/10
+                    <?php
+                    $rounded = number_format($meanScore, 1);
+                    $display = ($rounded == intval($rounded)) ? intval($rounded) : $rounded;
+                    ?>
+                    <?= $display ?>/10
                 </div>
             <?php endif; ?>
         </div>
@@ -68,8 +76,8 @@ $episode_count = $media['episode_count'] ?? null;
         <div class="sidebar"></div>
 
         <div class="content">
-            <div class="media-info-flex">
-                <div class="media-details-panel">
+            <div class="media-info-flex<?php if (empty($relatedMedia)) echo ' center-details'; ?>">
+                <div class="media-details-panel<?php if (empty($relatedMedia)) echo ' centered'; ?>" id="media-details-panel">
                     <div class="media-details-row">
                         <span class="media-details-label">Autor:</span>
                         <span
@@ -93,10 +101,23 @@ $episode_count = $media['episode_count'] ?? null;
                         <span class="media-details-label">Žánr:</span>
                         <span class="media-details-value">
                             <?php
+                            // prekladani zanru
+                            $genreMap = [
+                                'Action' => 'Akce',
+                                'Adventure' => 'Dobrodružný',
+                                'Comedy' => 'Komedie',
+                                'Drama' => 'Drama',
+                                'Fantasy' => 'Fantasy',
+                                'Romance' => 'Romantika',
+                                'Sci-Fi' => 'Sci-Fi',
+                                'Thriller' => 'Thriller',
+                                'Mystery' => 'Mysteriózní',
+                            ];
                             if (!empty($genre)) {
                                 $genres = array_map('trim', explode(',', $genre));
                                 foreach ($genres as $g) {
-                                    echo '<div>' . htmlspecialchars(ucfirst($g)) . '</div>';
+                                    $cz = $genreMap[$g] ?? $g;
+                                    echo '<div>' . htmlspecialchars($cz) . '</div>';
                                 }
                             } else {
                                 echo '—';
@@ -110,7 +131,7 @@ $episode_count = $media['episode_count'] ?? null;
                     </div>
                 </div>
 
-                <div style="flex:1; margin-left:32px;">
+                <div id="related-media-panel" class="<?php if (empty($relatedMedia)) echo 'hidden'; ?>" style="flex:1; margin-left:32px;">
                     <?php if (!empty($relatedMedia)): ?>
                         <div>
                             <h4 style="margin-top:20px">Související média</h4>
@@ -177,11 +198,13 @@ $episode_count = $media['episode_count'] ?? null;
                     </form>
                 <?php endif; ?>
 
-                <!-- Display comments -->
+                <!-- zobrazeni komentaru -->
                 <?php foreach ($comments as $c): ?>
                     <div class="comment-card" style="position:relative;">
                         <div class="comment-meta">
-                            <?= htmlspecialchars($c['username']) ?>
+                            <a href="/WA-2025-KV-semestral_project/my-rating/views/user/Profile.php?id=<?= urlencode($c['user_id']) ?>" class="comment-username" style="color:#8bc34a;font-weight:bold;text-decoration:none;">
+                                <?= htmlspecialchars($c['username']) ?>
+                            </a>
                             <span class="comment-rating"><?= htmlspecialchars($c['rating']) ?>/10*</span>
                             <span style="float:right;color:#888;"><?= htmlspecialchars($c['created_at']) ?></span>
                         </div>
@@ -208,7 +231,7 @@ $episode_count = $media['episode_count'] ?? null;
                                 </div>
                             </form>
                         <?php else: ?>
-                            <div><?= nl2br(htmlspecialchars($c['content'])) ?></div>
+                            <div style="padding-bottom:1.4rem;"><?= nl2br(htmlspecialchars($c['content'])) ?></div>
                             <?php if (isset($_SESSION['user'])): ?>
                                 <div class="comment-actions">
                                     <?php if ($userId === $c['user_id']): ?>
@@ -228,10 +251,10 @@ $episode_count = $media['episode_count'] ?? null;
 
         <div class="sidebar"></div>
     </div>
-
 </body>
+
 <script>
-// Hamburger menu toggle for detail page
+// hamburger menu
 const hamburger = document.getElementById('hamburger-menu');
 const burgerMenuPanel = document.getElementById('burger-menu-panel');
 if (hamburger && burgerMenuPanel) {
@@ -248,27 +271,4 @@ if (hamburger && burgerMenuPanel) {
     });
 }
 </script>
-<style>
-@media (max-width: 900px) {
-    .header .menu,
-    .header .user {
-        display: none !important;
-    }
-    .hamburger {
-        display: block !important;
-    }
-    .burger-menu {
-        display: none !important;
-    }
-    .burger-menu.open {
-        display: flex !important;
-    }
-}
-@media (min-width: 901px) {
-    .burger-menu {
-        display: none !important;
-    }
-}
-</style>
-
 </html>

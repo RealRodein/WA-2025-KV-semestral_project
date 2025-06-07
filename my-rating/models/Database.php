@@ -1,5 +1,5 @@
 <?php
-
+// trida pro praci s databazi
 class Database {
     private $host = "localhost";
     private $db_name = "wa_vojtech_kupec";
@@ -8,30 +8,19 @@ class Database {
     public $conn;
 
     public function getConnection() {
-        
-        // Odpojí připojení k databázi tím, že změní proměnnou $this->conn na null.
-        // Ukončí existující PDO objekt, což může být užitečné pro správu paměti.
+        // vytvori nove pripojeni k databazi
         $this->conn = null;
-        
         try {
-            
-            // PDO (PHP Data Objects) – Bezpečné a univerzální připojení k databázi
-            // PDO je rozhraní pro práci s databázemi v PHP.
             $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
-            
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-            // Výpis informace o úspěšném připojení (pro testování)
-            //echo "Připojení k databázi bylo úspěšné!<br>";
-            
         } catch (PDOException $exception) {
-            echo "Chyba připojení: " . $exception->getMessage();
+            echo "Chyba pripojeni: " . $exception->getMessage();
         }
         return $this->conn;
     }
 }
 
-// Pro otestování připojení stačí tento soubor spustit
-// Můžete tento kód zakomentovat po ověření
+// Pro otestovani pripojeni staci tento soubor spustit
+// Muzete tento kod zakomentovat po overeni
 //$database = new Database();
 //$database->getConnection();
