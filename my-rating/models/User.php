@@ -49,6 +49,14 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC); // Return the user data or false if not found
     }
 
+    // Get all users
+    public function getAll() {
+        $sql = "SELECT * FROM users ORDER BY id ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function alert($message, $redirectUrl) {
         echo "<script>
             alert('$message');

@@ -11,7 +11,7 @@ body {
 }
 
 .sidebar {
-  width: 150px; 
+  width: 150px;
   background-color: #111;
   border-right: 1px solid #222;
   min-height: 100vh;
@@ -25,7 +25,7 @@ body {
   position: relative;
   z-index: 0;
   border-left: 1px solid #222;
-  border-right: 1px solid #222; 
+  border-right: 1px solid #222;
 }
 
 .header {
@@ -43,6 +43,7 @@ body {
 .header .logo {
   display: flex;
   align-items: center;
+  height: 100%;
 }
 
 .header .menu {
@@ -66,21 +67,106 @@ body {
   cursor: pointer;
 }
 
+.burger-menu {
+  display: none;
+  position: absolute;
+  top: 60px;
+  right: 30px;
+  min-width: 180px;
+  background: #181818;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  padding: 8px 0;
+  transition: opacity 0.2s, transform 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.burger-menu.open {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.burger-menu a,
+.burger-menu span {
+  display: block;
+  padding: 12px 24px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+  word-break: break-word;
+}
+
+.burger-menu a:hover {
+  background: #232323;
+}
+
+
+
+body.select-edit-mode .header .menu a#edit-mode-btn,
+body.select-delete-mode .header .menu a#delete-mode-btn {
+  color: #ff4444 !important;
+}
+
+body.select-edit-mode .media-card-link,
+body.select-delete-mode .media-card-link {
+  cursor: pointer;
+}
+
 /* Responsive styles */
+@media (min-width: 901px) {
+  .hamburger {
+    display: none !important;
+  }
+
+  .header .menu,
+  .header .user {
+    display: flex !important;
+  }
+}
+
+
 @media (max-width: 900px) {
   .sidebar {
     display: none;
   }
+
   .main-wrapper {
     flex-direction: column;
     border: none;
   }
+
   .content {
     border-left: none;
     border-right: none;
     box-shadow: none;
   }
+
   .media-title-bar {
     margin: 0;
   }
+
+  .header {
+    grid-template-columns: 1fr 1fr;
+    padding: 10px 20px;
+    gap: 10px;
+    position: relative;
+  }
+
+  .header .menu,
+  .header .user {
+    display: none !important;
+  }
+
+  .hamburger {
+    display: block !important;
+    justify-self: end;
+    margin-left: auto;
+  }
+
 }

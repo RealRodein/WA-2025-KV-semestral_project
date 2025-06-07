@@ -3,6 +3,9 @@ if (!isset($allMedia)) {
     header('Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=create');
     exit;
 }
+$navbarContext = 'create';
+$cancelTo = '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php';
+include __DIR__ . '/../../public/navbar.php';
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -12,26 +15,10 @@ if (!isset($allMedia)) {
     <title>Moje-Hodnocení</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/layout.css">
+    <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/forms.css">
 </head>
 
 <body>
-    <div class="header">
-        <a class="logo" href="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php">
-            <img src="/WA-2025-KV-semestral_project/my-rating/public/images/icon.svg" alt="Moje-Hodnocení"
-                style="width:32px;height:32px;vertical-align:middle;">
-        </a>
-
-        <div class="menu">
-            <a href="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php">Procházet</a>
-            <a href="/WA-2025-KV-semestral_project/my-rating/views/user/Profile.php">Profil</a>
-        </div>
-
-        <div class="user">
-            <a class="user" href="/WA-2025-KV-semestral_project/my-rating/views/auth/Login.php">Přihlášení</a>
-            <a class="user" href="/WA-2025-KV-semestral_project/my-rating/views/auth/Register.php">Registrace</a>
-        </div>
-    </div>
-
     <div class="main-wrapper">
         <div class="sidebar"></div>
 
@@ -76,12 +63,6 @@ if (!isset($allMedia)) {
                     <label for="banner_url" class="form-label">URL banneru</label>
                     <input type="url" id="banner_url" name="banner_url"
                         class="form-control bg-dark text-light border-secondary">
-                </div>
-
-                <div class="mb-3">
-                    <label for="user_id" class="form-label">ID uživatele (dočasně)</label>
-                    <input type="number" id="user_id" name="user_id"
-                        class="form-control bg-dark text-light border-secondary" min="1" required>
                 </div>
 
                 <div class="mb-3">

@@ -46,7 +46,7 @@ class CommentController {
             if ($content) {
                 $this->commentModel->create($media_id, $user_id, $content, $rating);
             }
-            header("Location: ../views/media/detail.php?id=" . urlencode($media_id));
+            header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=" . urlencode($media_id));
             exit;
         }
     }
@@ -60,7 +60,7 @@ class CommentController {
                 $this->commentModel->update($comment_id, $content, $rating, $_SESSION['user']['id']);
             }
             // Redirect back to media detail or wherever appropriate
-            header("Location: ../views/media/detail.php?id=" . urlencode($_POST['media_id']));
+            header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=" . urlencode($_POST['media_id']));
             exit;
         }
     }
@@ -69,8 +69,18 @@ class CommentController {
         if (isset($_GET['comment_id']) && isset($_SESSION['user'])) {
             $comment_id = intval($_GET['comment_id']);
             $media_id = isset($_GET['media_id']) ? intval($_GET['media_id']) : 0;
-            $this->commentModel->delete($comment_id, $_SESSION['user']['id']);
-            header("Location: ../views/media/detail.php?id=" . urlencode($media_id));
+            if ($comment_id > 0 && $media_id > 0) {
+                $this->commentModel->delete($comment_id, $_SESSION['user']['id']);
+                header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=" . urlencode($media_id));
+                exit;
+            } else {
+                // Invalid IDs, redirect safely
+                header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php");
+                exit;
+            }
+        } else {
+            // Missing parameters or not logged in
+            header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php");
             exit;
         }
     }
@@ -80,7 +90,7 @@ class CommentController {
             $comment_id = intval($_GET['comment_id']);
             $media_id = isset($_GET['media_id']) ? intval($_GET['media_id']) : 0;
             $this->commentModel->upvote($comment_id, $_SESSION['user']['id']);
-            header("Location: ../views/media/detail.php?id=" . urlencode($media_id));
+            header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=" . urlencode($media_id));
             exit;
         }
     }
@@ -90,7 +100,7 @@ class CommentController {
             $comment_id = intval($_GET['comment_id']);
             $media_id = isset($_GET['media_id']) ? intval($_GET['media_id']) : 0;
             $this->commentModel->downvote($comment_id, $_SESSION['user']['id']);
-            header("Location: ../views/media/detail.php?id=" . urlencode($media_id));
+            header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=" . urlencode($media_id));
             exit;
         }
     }

@@ -15,7 +15,7 @@
     color: #fff; /* Text color */
     border: 1px solid #222; /* Border color */
     padding: 10px;
-    border-radius: 5px; /* Rounded corners */
+    border-radius: 6px; /* Rounded corners */
 }
 
 .filter-bar .form-control::placeholder,
@@ -25,16 +25,16 @@
 
 .filter-bar .btn {
     flex-shrink: 0;
-    background-color: #1b1b1b; /* Match navbar background color */
-    color: #fff; /* Button text color */
+    background-color: #fed500; /* Match navbar background color */
+    color: #000000; /* Button text color */
     border: 1px solid #222; /* Border color */
-    padding: 10px 20px;
-    border-radius: 5px; /* Rounded corners */
+    padding: 10px 15px;
+    border-radius: 6px; /* Rounded corners */
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .filter-bar .btn:hover {
-    background-color: #fff; /* Hover background color */
+    background-color: #d19800; /* Hover background color */
     color: #1b1b1b; /* Hover text color */
 }

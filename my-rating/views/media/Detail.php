@@ -28,22 +28,11 @@ $episode_count = $media['episode_count'] ?? null;
 </head>
 
 <body>
-    <div class="header">
-        <a class="logo" href="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php">
-            <img src="/WA-2025-KV-semestral_project/my-rating/public/images/icon.svg" alt="Moje-Hodnocení"
-                style="width:32px;height:32px;vertical-align:middle;">
-        </a>
-
-        <div class="menu">
-            <a href="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php">Procházet</a>
-            <a href="/WA-2025-KV-semestral_project/my-rating/views/user/Profile.php">Profil</a>
-        </div>
-
-        <div class="user">
-            <a class="user" href="/WA-2025-KV-semestral_project/my-rating/views/auth/Login.php">Přihlášení</a>
-            <a class="user" href="/WA-2025-KV-semestral_project/my-rating/views/auth/Register.php">Registrace</a>
-        </div>
-    </div> <!-- end of .header -->
+    <?php
+    $navbarContext = 'detail';
+    $media = $media ?? null;
+    include __DIR__ . '/../../public/navbar.php';
+    ?>
 
     <div class="media-banner" style="background-image: url('<?php echo htmlspecialchars($banner_url); ?>');">
         <div class="media-banner-overlay"></div>
@@ -79,7 +68,7 @@ $episode_count = $media['episode_count'] ?? null;
         <div class="sidebar"></div>
 
         <div class="content">
-            <div class="media-info-flex" style="align-items: flex-start; margin-bottom: 20px; ">
+            <div class="media-info-flex">
                 <div class="media-details-panel">
                     <div class="media-details-row">
                         <span class="media-details-label">Autor:</span>
@@ -124,7 +113,7 @@ $episode_count = $media['episode_count'] ?? null;
                 <div style="flex:1; margin-left:32px;">
                     <?php if (!empty($relatedMedia)): ?>
                         <div>
-                            <h4 class="text-light mb-3">Související média</h4>
+                            <h4 style="margin-top:20px">Související média</h4>
                             <div class="media-grid-related">
                                 <?php foreach ($relatedMedia as $rel): ?>
                                     <a href="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=<?= urlencode($rel['id']) ?>"
@@ -150,48 +139,136 @@ $episode_count = $media['episode_count'] ?? null;
             </div>
 
 
-            <h3 style="text-align: center;">Recenze a komentáře</h3>
+            <h3 style="text-align: center; margin-top: 20px;">Recenze a komentáře</h3>
 
             <div class="comments-section">
-                <form class="comment-form" method="POST"
-                    action="/WA-2025-KV-semestral_project/my-rating/controllers/CommentController.php?action=add">
-                    <input type="hidden" name="media_id" value="<?= htmlspecialchars($mediaId) ?>">
-                    <textarea name="content" required placeholder="Napište svůj komentář..."></textarea>
-                    <div style="align-items: center; display: flex; justify-content: space-between;">
-                        <label style="color:#fff; margin-bottom: 8px;">Hodnocení:
-                            <select name="rating" required>
-                                <option value="">—</option>
-                                <?php for ($i = 1; $i <= 10; $i++): ?>
-                                    <option value="<?= $i ?>"><?= $i ?></option>
-                                <?php endfor; ?>
-                            </select>
-                        </label>
-                        <button type="submit" style="margin-top: 4px;">Přidat komentář</button>
-                    </div>
+                <?php
+                $isEditing = false;
+                $editComment = null;
+                $userId = $_SESSION['user']['id'] ?? null;
+                $userRole = $_SESSION['user']['role'] ?? null;
+                if (isset($_GET['edit_comment_id']) && isset($_SESSION['user'])) {
+                    foreach ($comments as $c) {
+                        if (intval($_GET['edit_comment_id']) === intval($c['id']) && $userId === $c['user_id']) {
+                            $isEditing = true;
+                            $editComment = $c;
+                            break;
+                        }
+                    }
+                }
+                ?>
+                <?php if (!$isEditing && isset($_SESSION['user'])): ?>
+                    <a id="add-comment-form"></a>
+                    <form class="comment-form" method="POST"
+                        action="/WA-2025-KV-semestral_project/my-rating/controllers/CommentController.php?action=add">
+                        <input type="hidden" name="media_id" value="<?= htmlspecialchars($mediaId) ?>">
+                        <textarea name="content" required placeholder="Napište svůj komentář..."></textarea>
+                        <div style="align-items: center; display: flex; justify-content: space-between;">
+                            <label style="color:#fff; margin-bottom: 8px;">Hodnocení:
+                                <select name="rating" required>
+                                    <option value="">—</option>
+                                    <?php for ($i = 1; $i <= 10; $i++): ?>
+                                        <option value="<?= $i ?>"><?= $i ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                            </label>
+                            <button type="submit" style="margin-top: 4px;">Přidat komentář</button>
+                        </div>
+                    </form>
+                <?php endif; ?>
 
-                </form>
-
-                <!-- Example of displaying comments -->
+                <!-- Display comments -->
                 <?php foreach ($comments as $c): ?>
-                    <div class="comment-card">
+                    <div class="comment-card" style="position:relative;">
                         <div class="comment-meta">
                             <?= htmlspecialchars($c['username']) ?>
-                            <span class="comment-rating">★ <?= htmlspecialchars($c['rating']) ?>/10</span>
+                            <span class="comment-rating"><?= htmlspecialchars($c['rating']) ?>/10*</span>
                             <span style="float:right;color:#888;"><?= htmlspecialchars($c['created_at']) ?></span>
                         </div>
-                        <div><?= nl2br(htmlspecialchars($c['content'])) ?></div>
+                        <?php if ($isEditing && $editComment && $editComment['id'] == $c['id']): ?>
+                            <a id="edit-comment-form"></a>
+                            <form class="comment-form" method="POST"
+                                action="/WA-2025-KV-semestral_project/my-rating/controllers/CommentController.php?action=edit">
+                                <input type="hidden" name="comment_id" value="<?= htmlspecialchars($editComment['id']) ?>">
+                                <input type="hidden" name="media_id" value="<?= htmlspecialchars($mediaId) ?>">
+                                <textarea name="content" required><?= htmlspecialchars($editComment['content']) ?></textarea>
+                                <div style="align-items: center; display: flex; justify-content: space-between;">
+                                    <label style="color:#fff; margin-bottom: 8px;">Hodnocení:
+                                        <select name="rating" required>
+                                            <option value="">—</option>
+                                            <?php for ($i = 1; $i <= 10; $i++): ?>
+                                                <option value="<?= $i ?>"<?= ($editComment['rating'] == $i ? ' selected' : '') ?>><?= $i ?></option>
+                                            <?php endfor; ?>
+                                        </select>
+                                    </label>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <a href="?id=<?= urlencode($mediaId) ?>" class="comment-action-link">Zrušit</a>
+                                        <button type="submit" style="margin-top: 4px;">Uložit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        <?php else: ?>
+                            <div><?= nl2br(htmlspecialchars($c['content'])) ?></div>
+                            <?php if (isset($_SESSION['user'])): ?>
+                                <div class="comment-actions">
+                                    <?php if ($userId === $c['user_id']): ?>
+                                        <a href="/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=detail&id=<?= urlencode($mediaId) ?>&edit_comment_id=<?= urlencode($c['id']) ?>#edit-comment-form" class="comment-action-link">upravit</a>
+                                        |
+                                        <a href="/WA-2025-KV-semestral_project/my-rating/controllers/CommentController.php?action=delete&comment_id=<?= urlencode($c['id']) ?>&media_id=<?= urlencode($mediaId) ?>" class="comment-action-link" onclick="return confirm('Opravdu chcete smazat tento komentář?');">smazat</a>
+                                    <?php elseif ($userRole === 'admin'): ?>
+                                        <a href="/WA-2025-KV-semestral_project/my-rating/controllers/CommentController.php?action=delete&comment_id=<?= urlencode($c['id']) ?>&media_id=<?= urlencode($mediaId) ?>" class="comment-action-link" onclick="return confirm('Opravdu chcete smazat tento komentář?');">smazat</a>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
-
-
-
-
-
-
         </div>
 
         <div class="sidebar"></div>
     </div>
 
 </body>
+<script>
+// Hamburger menu toggle for detail page
+const hamburger = document.getElementById('hamburger-menu');
+const burgerMenuPanel = document.getElementById('burger-menu-panel');
+if (hamburger && burgerMenuPanel) {
+    hamburger.style.display = 'block';
+    hamburger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        burgerMenuPanel.classList.toggle('open');
+    });
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth > 900) return;
+        if (!burgerMenuPanel.contains(e.target) && e.target !== hamburger) {
+            burgerMenuPanel.classList.remove('open');
+        }
+    });
+}
+</script>
+<style>
+@media (max-width: 900px) {
+    .header .menu,
+    .header .user {
+        display: none !important;
+    }
+    .hamburger {
+        display: block !important;
+    }
+    .burger-menu {
+        display: none !important;
+    }
+    .burger-menu.open {
+        display: flex !important;
+    }
+}
+@media (min-width: 901px) {
+    .burger-menu {
+        display: none !important;
+    }
+}
+</style>
+
+</html>

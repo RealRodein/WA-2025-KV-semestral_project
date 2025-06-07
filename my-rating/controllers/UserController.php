@@ -26,6 +26,10 @@ class UserController {
                 $this->listUserMedia();
             } elseif ($action === 'comments') {
                 $this->listUserComments();
+            } elseif ($action === 'admin_update') {
+                $this->adminUpdateUser();
+            } elseif ($action === 'admin_delete') {
+                $this->adminDeleteUser();
             } else {
                 echo "Invalid action.";
             }
@@ -36,6 +40,9 @@ class UserController {
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $username = trim(htmlspecialchars($_POST['username']));
             $email = trim(htmlspecialchars($_POST['email']));
+            if ($email === '') {
+                $email = null;
+            }
             $password_hash = password_hash($_POST['password'], PASSWORD_BCRYPT);
             $role = 'user'; // Default role
 
@@ -44,7 +51,7 @@ class UserController {
                 header("Location: ../views/auth/Login.php");
                 exit();
             } else {
-                echo "<script>alert('Username is already in use.');</script>";
+                echo "<script>alert('Username or e-mail is already in use.'); window.location.href='../views/auth/Register.php';</script>";
             }
         } else {
             echo "Invalid request.";
@@ -111,6 +118,52 @@ class UserController {
 
         // You can include a view here to display the comments
         include '../views/user/UserComments.php';
+    }
+
+    // Admin: update user email and role
+    public function adminUpdateUser() {
+        $id = $_POST['id'] ?? null;
+        $email = trim($_POST['email'] ?? '');
+        $role = $_POST['role'] ?? '';
+        if (!$id || !$email || !$role) {
+            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Email+a+role+jsou+povinné.&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
+            exit();
+        }
+        $db = $this->db;
+        // Check for duplicate email (other than this user)
+        $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND id != ?');
+        $stmt->execute([$email, $id]);
+        if ($stmt->fetch()) {
+            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Email+je+již+použit+jinde.&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
+            exit();
+        }
+        try {
+            $stmt = $db->prepare('UPDATE users SET email = ?, role = ? WHERE id = ?');
+            $stmt->execute([$email, $role, $id]);
+            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?message=Uživatel+upraven.');
+            exit();
+        } catch (PDOException $e) {
+            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Chyba+při+ukládání:+'.urlencode($e->getMessage()).'&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
+            exit();
+        }
+    }
+
+    // Admin: delete user
+    private function adminDeleteUser() {
+        session_start();
+        if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
+            header('Location: ../views/media/List.php');
+            exit();
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = intval($_POST['id']);
+            $stmt = $this->db->prepare('DELETE FROM users WHERE id = :id');
+            $stmt->execute([':id' => $id]);
+            header('Location: ../views/user/Users.php?message=Uživatel smazán');
+            exit();
+        }
+        header('Location: ../views/user/Users.php?error=Neplatný požadavek');
+        exit();
     }
 }
 

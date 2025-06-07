@@ -1,7 +1,7 @@
 .media-card {
     width: 220px;
     background: #181818;
-    border-radius: 12px;
+    border-radius: 6px;
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     text-align: center;
@@ -20,7 +20,8 @@
     width: 200px;
     height: 280px;
     object-fit: cover;
-    border-radius: 8px;
+    object-position: center;
+    border-radius: 6px;
     margin-bottom: 0.5rem;
     display: block;
 }
@@ -33,17 +34,26 @@
 .media-card.related-media-card img {
     width: 100px;
     height: 140px;
+    object-fit: cover;
+    object-position: center;
     border-radius: 6px;
     margin-bottom: 0.3rem;
 }
 
 .media-title {
-    margin-top: 1rem;
+    margin-top: 0.1rem;
     color: #fff;
     font-size: 1.5rem;
     text-align: left;
     width: 100%;
     max-width: 180px;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .media-title.related-media-title {
@@ -54,13 +64,13 @@
 .media-poster-hoverbox {
     position: relative;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: 6px;
 }
 
 .media-poster-hoverbox img {
     display: block;
     width: 100%;
-    border-radius: 16px;
+    border-radius: 6px;
     transition: transform 0.2s;
 }
 
@@ -79,7 +89,7 @@
 .media-poster-overlay {
     background: rgba(20, 20, 20, 0.65);
     z-index: 1;
-    border-radius: 10px;
+    border-radius: 6px;
 }
 
 .media-poster-rating {
@@ -89,7 +99,7 @@
     font-weight: 700;
     text-shadow: 0 2px 8px rgba(0,0,0,0.4);
     background: rgba(30,30,30,0.7);
-    border-radius: 16px;
+    border-radius: 6px;
     padding: 12px 32px;
     width: auto;
     height: auto;
@@ -111,7 +121,7 @@
     font-weight: 700;
     text-shadow: 0 2px 8px rgba(0,0,0,0.4);
     background: rgba(30,30,30,0.7);
-    border-radius: 16px;
+    border-radius: 6px;
     padding: 12px 32px;
     width: auto;
     height: auto;
@@ -130,3 +140,5 @@
 .media-poster-hoverbox:hover .media-poster-rating-related {
     opacity: 1;
 }
+
+

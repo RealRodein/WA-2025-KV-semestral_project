@@ -19,7 +19,7 @@ class Media {
             ':year' => $year,
             ':image_url' => $image_url,
             ':banner_url' => $banner_url,
-            ':created_by' => null, // always NULL for now
+            ':created_by' => $user_id, // Fix: use $user_id for created_by
             ':related' => $related,
             ':author' => $author,
             ':duration' => $duration,

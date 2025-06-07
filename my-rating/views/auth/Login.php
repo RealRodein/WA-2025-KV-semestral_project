@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Moje-Hodnocení</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/style.css">
+    <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/layout.css">
 </head>
 <body>
     <div class="header">

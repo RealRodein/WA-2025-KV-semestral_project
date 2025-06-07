@@ -25,12 +25,22 @@ class MediaController {
             case 'detail':
                 $this->showDetail();
                 break;
+            case 'delete':
+                $this->deleteMedia();
+                break;
+            case 'edit':
+                $this->editMedia();
+                break;
             default:
                 $this->alert('Invalid action.', '../views/media/List.php');
         }
     }
 
     private function createMedia() {
+        session_start();
+        if (!isset($_SESSION['user'])) {
+            $this->alert('Nejste přihlášeni.', '../views/media/List.php');
+        }
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $title = htmlspecialchars($_POST['title']);
             $description = htmlspecialchars($_POST['description']);
@@ -39,7 +49,7 @@ class MediaController {
             $year = isset($_POST['year']) ? intval($_POST['year']) : null;
             $image_url = htmlspecialchars($_POST['image_url']);
             $banner_url = htmlspecialchars($_POST['banner_url']);
-            $user_id = htmlspecialchars($_POST['user_id']);
+            $user_id = $_SESSION['user']['id'];
             $related = isset($_POST['related']) ? $_POST['related'] : [];
             $relatedJson = json_encode($related);
 
@@ -207,6 +217,97 @@ class MediaController {
             return;
         }
         $this->alert('Médium nebylo nalezeno.', '../views/media/List.php');
+    }
+
+    private function editMedia() {
+        session_start();
+        if (!isset($_SESSION['user'])) {
+            $this->alert('Nejste přihlášeni.', '../views/media/List.php');
+        }
+        $user = $_SESSION['user'];
+        $mediaId = isset($_GET['id']) ? intval($_GET['id']) : (isset($_POST['id']) ? intval($_POST['id']) : null);
+        if (!$mediaId) {
+            $this->alert('Neplatné médium.', '../views/media/List.php');
+        }
+        // Fetch media to check ownership
+        $stmt = $this->db->prepare('SELECT * FROM media WHERE id = :id');
+        $stmt->execute([':id' => $mediaId]);
+        $media = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$media) {
+            $this->alert('Médium nebylo nalezeno.', '../views/media/List.php');
+        }
+        $isOwner = isset($media['user_id']) && $media['user_id'] == $user['id'];
+        $isTrusted = $user['role'] === 'trusted';
+        $isAdmin = $user['role'] === 'admin';
+        // Edit: admin and trusted can edit all, user cannot edit
+        if (!($isAdmin || $isTrusted)) {
+            $this->alert('Nemáte oprávnění k úpravě tohoto média.', '../views/media/List.php');
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Update media
+            $title = htmlspecialchars($_POST['title']);
+            $description = htmlspecialchars($_POST['description']);
+            $genre = isset($_POST['genre']) ? implode(',', $_POST['genre']) : '';
+            $type = htmlspecialchars($_POST['type']);
+            $year = isset($_POST['year']) ? intval($_POST['year']) : null;
+            $image_url = htmlspecialchars($_POST['image_url']);
+            $banner_url = htmlspecialchars($_POST['banner_url']);
+            $related = isset($_POST['related']) ? $_POST['related'] : [];
+            $relatedJson = json_encode($related);
+            $author = isset($_POST['author']) ? htmlspecialchars($_POST['author']) : null;
+            $duration = isset($_POST['duration']) ? intval($_POST['duration']) : null;
+            $episode_count = isset($_POST['episode_count']) ? intval($_POST['episode_count']) : null;
+            $stmt = $this->db->prepare('UPDATE media SET title = :title, description = :description, genre = :genre, type = :type, year = :year, image_url = :image_url, banner_url = :banner_url, related = :related, author = :author, duration = :duration, episode_count = :episode_count WHERE id = :id');
+            $stmt->execute([
+                ':title' => $title,
+                ':description' => $description,
+                ':genre' => $genre,
+                ':type' => $type,
+                ':year' => $year,
+                ':image_url' => $image_url,
+                ':banner_url' => $banner_url,
+                ':related' => $relatedJson,
+                ':author' => $author,
+                ':duration' => $duration,
+                ':episode_count' => $episode_count,
+                ':id' => $mediaId
+            ]);
+            $this->alert('Médium bylo úspěšně upraveno.', '../views/media/List.php');
+        } else {
+            // Redirect to edit form (should not happen if routed correctly)
+            header('Location: ../views/media/Edit.php?id=' . $mediaId);
+            exit();
+        }
+    }
+
+    private function deleteMedia() {
+        session_start();
+        if (!isset($_SESSION['user'])) {
+            $this->alert('Nejste přihlášeni.', '../views/media/List.php');
+        }
+        $user = $_SESSION['user'];
+        $mediaId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($mediaId <= 0) {
+            $this->alert('Neplatné médium.', '../views/media/List.php');
+        }
+        // Fetch media to check ownership
+        $stmt = $this->db->prepare('SELECT * FROM media WHERE id = :id');
+        $stmt->execute([':id' => $mediaId]);
+        $media = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$media) {
+            $this->alert('Médium nebylo nalezeno.', '../views/media/List.php');
+        }
+        $isOwner = isset($media['user_id']) && $media['user_id'] == $user['id'];
+        $isTrusted = $user['role'] === 'trusted';
+        $isAdmin = $user['role'] === 'admin';
+        // Delete: admin can delete all, trusted can only delete own, user cannot delete
+        if (!($isAdmin || ($isTrusted && $isOwner))) {
+            $this->alert('Nemáte oprávnění ke smazání tohoto média.', '../views/media/List.php');
+        }
+        // Delete media
+        $stmt = $this->db->prepare('DELETE FROM media WHERE id = :id');
+        $stmt->execute([':id' => $mediaId]);
+        $this->alert('Médium bylo úspěšně smazáno.', '../views/media/List.php');
     }
 
     private function getFilterOptions() {

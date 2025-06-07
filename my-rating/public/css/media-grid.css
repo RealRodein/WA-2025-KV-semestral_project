@@ -30,36 +30,4 @@
     .media-grid {
         grid-template-columns: 1fr;
     }
-}.media-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 2rem;
-    justify-content: start;
-    align-items: start;
-    margin-top: 2rem;
-}
-
-.media-grid-related {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 0.5rem;
-    justify-content: start;
-    align-items: start;
-    margin-top: 2rem;
-}
-
-@media (max-width: 1200px) {
-    .media-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-@media (max-width: 800px) {
-    .media-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-@media (max-width: 500px) {
-    .media-grid {
-        grid-template-columns: 1fr;
-    }
 }
