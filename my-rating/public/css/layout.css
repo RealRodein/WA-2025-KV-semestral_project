@@ -62,7 +62,7 @@ body {
 .header .user {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   gap: 10px;
   text-decoration: none;
@@ -169,7 +169,7 @@ body.select-delete-mode .media-card-link {
   .header .user {
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 20px;
   }
 }
