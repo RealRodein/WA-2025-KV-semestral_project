@@ -32,5 +32,6 @@ require_once __DIR__ . '/../../public/navbar.php';
 
         <div class="sidebar"></div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

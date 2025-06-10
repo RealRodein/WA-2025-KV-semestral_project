@@ -35,7 +35,7 @@ class UserController {
             } elseif ($action === 'admin_delete') {
                 $this->adminDeleteUser();
             } else {
-                echo "Invalid action.";
+                $this->alert('Neplatná akce', '/WA-2025-KV-semestral_project/my-rating/controllers/UserController.php?action=list');
             }
         }
     }
@@ -48,16 +48,16 @@ class UserController {
                 $email = null;
             }
             $password_hash = password_hash($_POST['password'], PASSWORD_BCRYPT);
-            $role = 'user'; // vychozi role
+            $role = 'user'; // výchozí role
 
             if ($this->UserModel->create($username, $email, $password_hash, $role)) {
                 header("Location: ../views/auth/Login.php");
                 exit();
             } else {
-                echo "<script>alert('Username or e-mail is already in use.'); window.location.href='../views/auth/Register.php';</script>";
+                $this->alert('Uživatelské jméno nebo e-mail je již použitý', '../views/auth/Register.php');
             }
         } else {
-            echo "Invalid request.";
+            $this->alert('Neplatný požadavek', '../views/auth/Register.php');
         }
     }
 
@@ -78,10 +78,10 @@ class UserController {
                 header("Location: ../controllers/MediaController.php");
                 exit();
             } else {
-                $this->UserModel->alert('Invalid username or password.', '../views/auth/Login.php');
+                $this->alert('Neplatné uživatelské jméno nebo heslo', '../views/auth/Login.php');
             }
         } else {
-            $this->UserModel->alert('Invalid request.', '../views/auth/Login.php');
+            $this->alert('Neplatný požadavek', '../views/auth/Login.php');
         }
     }
 
@@ -95,7 +95,7 @@ class UserController {
 
     private function listUserMedia() {
         if (!isset($_GET['user_id'])) {
-            echo "User ID not specified.";
+            $this->alert('Chybí user ID', '../controllers/UserController.php?action=list');
             return;
         }
         $user_id = intval($_GET['user_id']);
@@ -108,7 +108,7 @@ class UserController {
 
     private function listUserComments() {
         if (!isset($_GET['user_id'])) {
-            echo "User ID not specified.";
+            $this->alert('Chybí user ID', '../controllers/UserController.php?action=list');
             return;
         }
         $user_id = intval($_GET['user_id']);
@@ -125,24 +125,20 @@ class UserController {
         $email = trim($_POST['email'] ?? '');
         $role = $_POST['role'] ?? '';
         if (!$id || !$email || !$role) {
-            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Email+a+role+jsou+povinne.&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
-            exit();
+            $this->alert('E-mail a role jsou povinné', '/WA-2025-KV-semestral_project/my-rating/controllers/UserController.php?action=list&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
         }
         $db = $this->db;
         $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND id != ?');
         $stmt->execute([$email, $id]);
         if ($stmt->fetch()) {
-            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Email+je+jiz+pouzity+jinde.&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
-            exit();
+            $this->alert('E-mail je již použitý jinde', '/WA-2025-KV-semestral_project/my-rating/controllers/UserController.php?action=list&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
         }
         try {
             $stmt = $db->prepare('UPDATE users SET email = ?, role = ? WHERE id = ?');
             $stmt->execute([$email, $role, $id]);
-            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?message=uzivatel+upraven.');
-            exit();
+            $this->alert('Uživatel upraven', '/WA-2025-KV-semestral_project/my-rating/controllers/UserController.php?action=list');
         } catch (PDOException $e) {
-            header('Location: /WA-2025-KV-semestral_project/my-rating/views/user/Users.php?error=Chyba+pri+ukladani:+'.urlencode($e->getMessage()).'&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
-            exit();
+            $this->alert('Chyba při ukládání: ' . $e->getMessage(), '/WA-2025-KV-semestral_project/my-rating/controllers/UserController.php?action=list&id=' . urlencode($id) . '&email=' . urlencode($email) . '&role=' . urlencode($role));
         }
     }
 
@@ -150,8 +146,7 @@ class UserController {
     private function adminDeleteUser() {
         session_start();
         if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
-            header('Location: ../views/media/List.php');
-            exit();
+            $this->alert('Nemáte oprávnění', '/WA-2025-KV-semestral_project/my-rating/controllers/UserController.php?action=list');
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = intval($_POST['id']);
@@ -172,10 +167,13 @@ class UserController {
             // smazani uzivatele
             $stmt = $this->db->prepare('DELETE FROM users WHERE id = :id');
             $stmt->execute([':id' => $id]);
-            header('Location: ../views/user/Users.php?message=uzivatel+smazan');
-            exit();
+            $this->alert('Uživatel smazán', '/WA-2025-KV-semestral_project/my-rating/controllers/UserController.php?action=list');
         }
-        header('Location: ../views/user/Users.php?error=neplatny+pozadavek');
+        $this->alert('Neplatný požadavek', '/WA-2025-KV-semestral_project/my-rating/controllers/UserController.php?action=list');
+    }
+
+    private function alert($message, $redirectUrl) {
+        echo "<script>\n alert('" . addslashes($message) . "');\n window.location.href = '" . $redirectUrl . "';\n </script>";
         exit();
     }
 }

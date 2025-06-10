@@ -251,24 +251,25 @@ $episode_count = $media['episode_count'] ?? null;
 
         <div class="sidebar"></div>
     </div>
+
+    <script>
+    // hamburger menu
+    const hamburger = document.getElementById('hamburger-menu');
+    const burgerMenuPanel = document.getElementById('burger-menu-panel');
+    if (hamburger && burgerMenuPanel) {
+        hamburger.style.display = 'block';
+        hamburger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            burgerMenuPanel.classList.toggle('open');
+        });
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth > 900) return;
+            if (!burgerMenuPanel.contains(e.target) && e.target !== hamburger) {
+                burgerMenuPanel.classList.remove('open');
+            }
+        });
+    }
+    </script>
 </body>
 
-<script>
-// hamburger menu
-const hamburger = document.getElementById('hamburger-menu');
-const burgerMenuPanel = document.getElementById('burger-menu-panel');
-if (hamburger && burgerMenuPanel) {
-    hamburger.style.display = 'block';
-    hamburger.addEventListener('click', function(e) {
-        e.stopPropagation();
-        burgerMenuPanel.classList.toggle('open');
-    });
-    document.addEventListener('click', function(e) {
-        if (window.innerWidth > 900) return;
-        if (!burgerMenuPanel.contains(e.target) && e.target !== hamburger) {
-            burgerMenuPanel.classList.remove('open');
-        }
-    });
-}
-</script>
 </html>

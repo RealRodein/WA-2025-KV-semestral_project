@@ -26,14 +26,12 @@ $error = $_GET['error'] ?? null;
     <link rel="stylesheet" href="/WA-2025-KV-semestral_project/my-rating/public/css/layout.css">
 </head>
 <body>
-<?php
-$navbarContext = 'list';
-include __DIR__ . '/../../public/navbar.php';
-?>
+    <?php
+    $navbarContext = 'list';
+    include __DIR__ . '/../../public/navbar.php';
+    ?>
     <div class="main-wrapper">
-
-    <div class="sidebar"></div>
-
+        <div class="sidebar"></div>
         <div class="content">
             <h2 class="mb-4 text-center">Správa uživatelů</h2>
             <?php if ($message): ?>
@@ -94,5 +92,6 @@ include __DIR__ . '/../../public/navbar.php';
         <div class="sidebar"></div>
 
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

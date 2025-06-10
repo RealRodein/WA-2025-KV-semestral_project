@@ -115,30 +115,30 @@ include __DIR__ . '/../../public/navbar.php';
                         class="form-control bg-dark text-light border-secondary" min="1">
                 </div>
 
-                <script>
-                // nastav episode_count na 1 pokud je typ 'film'
-                document.addEventListener('DOMContentLoaded', function() {
-                    const typeSelect = document.getElementById('type');
-                    const episodeInput = document.getElementById('episode_count');
-                    function updateEpisodeCount() {
-                        if (typeSelect.value === 'film') {
-                            episodeInput.value = 1;
-                            episodeInput.readOnly = true;
-                        } else {
-                            episodeInput.value = '';
-                            episodeInput.readOnly = false;
-                        }
-                    }
-                    typeSelect.addEventListener('change', updateEpisodeCount);
-                    updateEpisodeCount();
-                });
-                </script>
-
                 <button type="submit" class="btn btn-success w-100">Uložit</button>
             </form>
         </div>
         <div class="sidebar"></div>
     </div>
+
+    <script>
+    // nastav episode_count na 1 pokud je typ 'film'
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('type');
+        const episodeInput = document.getElementById('episode_count');
+        function updateEpisodeCount() {
+            if (typeSelect.value === 'film') {
+                episodeInput.value = 1;
+                episodeInput.readOnly = true;
+            } else {
+                episodeInput.value = '';
+                episodeInput.readOnly = false;
+            }
+        }
+        typeSelect.addEventListener('change', updateEpisodeCount);
+        updateEpisodeCount();
+    });
+    </script>
 </body>
 
 </html>

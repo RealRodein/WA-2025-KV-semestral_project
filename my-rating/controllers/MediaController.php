@@ -32,14 +32,15 @@ class MediaController {
                 $this->editMedia();
                 break;
             default:
-                $this->alert('Invalid action.', '../views/media/List.php');
+                $this->alert('Invalid action.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         }
     }
 
     private function createMedia() {
         session_start();
         if (!isset($_SESSION['user'])) {
-            $this->alert('Nejste přihlášeni.', '../views/media/List.php');
+            // nejste prihlaseni
+            $this->alert('Nejste přihlášeni.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         }
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $title = htmlspecialchars($_POST['title']);
@@ -53,7 +54,7 @@ class MediaController {
             $related = isset($_POST['related']) ? $_POST['related'] : [];
             $relatedJson = json_encode($related);
 
-            // New fields
+            // nove polozky
             $author = isset($_POST['author']) ? htmlspecialchars($_POST['author']) : null;
             $duration = isset($_POST['duration']) ? intval($_POST['duration']) : null;
             $episode_count = isset($_POST['episode_count']) ? intval($_POST['episode_count']) : null;
@@ -62,12 +63,15 @@ class MediaController {
                 $title, $description, $genre, $type, $year, $image_url, $banner_url, $user_id, $relatedJson,
                 $author, $duration, $episode_count
             )) {
-                header("Location: ../views/media/List.php");
+                // presmerovani na seznam medii po vytvoreni
+                header("Location: /WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list");
                 exit();
             } else {
-                $this->alert('Chyba při vytváření média.', '../views/media/Create.php');
+                // chyba pri vytvareni media
+                $this->alert('Chyba při vytváření média.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
             }
         } else {
+            // zobrazit formular pro vytvoreni
             $this->showCreateForm();
         }
     }
@@ -131,19 +135,19 @@ class MediaController {
             $stmt->execute([':id' => $mediaId]);
             $media = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // --- Two-way related media fetch ---
+            // oboustranne vyhledavani souvisejicich medii
             $relatedIds = [];
             if ($media && !empty($media['related'])) {
-                // Try JSON decode first
+                // nejdrive zkusi json decode
                 $relatedIds = json_decode($media['related'], true);
                 if (!is_array($relatedIds)) {
-                    // Fallback: try CSV
+                    // pokud selze, zkusi csv
                     $relatedIds = array_filter(array_map('trim', explode(',', $media['related'])));
                 }
                 $relatedIds = array_map('intval', $relatedIds);
             }
 
-            // Fetch media that this media relates to (direct)
+            // ziskani medii na ktera toto medium odkazuje (primy vztah)
             $directRelated = [];
             if (count($relatedIds) > 0) {
                 $placeholders = implode(',', array_fill(0, count($relatedIds), '?'));
@@ -152,10 +156,10 @@ class MediaController {
                 $directRelated = $stmt4->fetchAll(PDO::FETCH_ASSOC);
             }
 
-            // Fetch media that are related to this media (reverse)
+            // ziskani medii ktera odkazuji na toto medium (reverzni vztah)
             $reverseRelated = [];
 
-            // JSON reverse (search for both string and int)
+            // json reverzni vyhledavani (hleda jak retezec, tak cislo)
             $stmt2 = $this->db->prepare(
                 "SELECT id, title, image_url FROM media 
                  WHERE JSON_VALID(related) 
@@ -167,7 +171,7 @@ class MediaController {
             ]);
             $reverseRelated = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
-            // CSV reverse
+            // reverzni vyhledavani pro csv
             $stmt3 = $this->db->prepare("SELECT id, title, image_url, related FROM media WHERE related LIKE :likeid AND (JSON_VALID(related) = 0 OR JSON_VALID(related) IS NULL)");
             $likeid = '%'.($mediaId).'%';
             $stmt3->execute([':likeid' => $likeid]);
@@ -183,7 +187,7 @@ class MediaController {
                 }
             }
 
-            // Merge and deduplicate (by id, and not self)
+            // slouceni a odstraneni duplicit (podle id, a ne sebe sama)
             $allRelated = [];
             foreach (array_merge($directRelated, $reverseRelated) as $rel) {
                 if ($rel['id'] != $mediaId) {
@@ -197,7 +201,7 @@ class MediaController {
             }
             unset($rel);
 
-            // --- Comments ---
+            // komentare
             $stmt = $this->db->prepare("
                 SELECT c.*, u.username 
                 FROM comments c 
@@ -208,7 +212,7 @@ class MediaController {
             $stmt->execute([':media_id' => $mediaId]);
             $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Calculate mean score
+            // vypocet prumerneho hodnoceni
             $ratings = array_column($comments, 'rating');
             $ratings = array_filter($ratings, fn($r) => $r !== null && $r !== '');
             $meanScore = count($ratings) > 0 ? round(array_sum($ratings) / count($ratings), 2) : null;
@@ -222,29 +226,33 @@ class MediaController {
     private function editMedia() {
         session_start();
         if (!isset($_SESSION['user'])) {
-            $this->alert('Nejste přihlášeni.', '../views/media/List.php');
+            // nejste prihlaseni
+            $this->alert('Nejste přihlášeni.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         }
         $user = $_SESSION['user'];
         $mediaId = isset($_GET['id']) ? intval($_GET['id']) : (isset($_POST['id']) ? intval($_POST['id']) : null);
         if (!$mediaId) {
-            $this->alert('Neplatné médium.', '../views/media/List.php');
+            // neplatne medium
+            $this->alert('Neplatné médium.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         }
-        // Fetch media to check ownership
+        // nacteni media pro kontrolu vlastnictvi
         $stmt = $this->db->prepare('SELECT * FROM media WHERE id = :id');
         $stmt->execute([':id' => $mediaId]);
         $media = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$media) {
-            $this->alert('Médium nebylo nalezeno.', '../views/media/List.php');
+            // medium nebylo nalezeno
+            $this->alert('Médium nebylo nalezeno.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         }
         $isOwner = isset($media['user_id']) && $media['user_id'] == $user['id'];
         $isTrusted = $user['role'] === 'trusted';
         $isAdmin = $user['role'] === 'admin';
-        // Edit: admin and trusted can edit all, user cannot edit
+        // editace: admin a trusted mohou upravit vse, uzivatel nemuze upravit
         if (!($isAdmin || $isTrusted)) {
-            $this->alert('Nemáte oprávnění k úpravě tohoto média.', '../views/media/List.php');
+            // nemate opravneni k uprave tohoto media
+            $this->alert('Nemáte oprávnění k úpravě tohoto média.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Update media
+            // aktualizace media
             $title = htmlspecialchars($_POST['title']);
             $description = htmlspecialchars($_POST['description']);
             $genre = isset($_POST['genre']) ? implode(',', $_POST['genre']) : '';
@@ -272,9 +280,10 @@ class MediaController {
                 ':episode_count' => $episode_count,
                 ':id' => $mediaId
             ]);
-            $this->alert('Médium bylo úspěšně upraveno.', '../views/media/List.php');
+            // medium bylo uspesne upraveno
+            $this->alert('Médium bylo úspěšně upraveno.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         } else {
-            // Redirect to edit form (should not happen if routed correctly)
+            // presmerovani na formular pro editaci (nema by se stat pokud je spravne routovano)
             header('Location: ../views/media/Edit.php?id=' . $mediaId);
             exit();
         }
@@ -283,31 +292,36 @@ class MediaController {
     private function deleteMedia() {
         session_start();
         if (!isset($_SESSION['user'])) {
-            $this->alert('Nejste přihlášeni.', '../views/media/List.php');
+            // nejste prihlaseni
+            $this->alert('Nejste přihlášeni.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         }
         $user = $_SESSION['user'];
         $mediaId = isset($_GET['id']) ? intval($_GET['id']) : 0;
         if ($mediaId <= 0) {
-            $this->alert('Neplatné médium.', '../views/media/List.php');
+            // neplatne medium
+            $this->alert('Neplatné médium.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         }
-        // Fetch media to check ownership
+        // nacteni media pro kontrolu vlastnictvi
         $stmt = $this->db->prepare('SELECT * FROM media WHERE id = :id');
         $stmt->execute([':id' => $mediaId]);
         $media = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$media) {
-            $this->alert('Médium nebylo nalezeno.', '../views/media/List.php');
+            // medium nebylo nalezeno
+            $this->alert('Médium nebylo nalezeno.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         }
         $isOwner = isset($media['user_id']) && $media['user_id'] == $user['id'];
         $isTrusted = $user['role'] === 'trusted';
         $isAdmin = $user['role'] === 'admin';
-        // Delete: admin can delete all, trusted can only delete own, user cannot delete
+        // mazani: admin muze mazat vse, trusted muze mazat jen sve, uzivatel nemuze mazat
         if (!($isAdmin || ($isTrusted && $isOwner))) {
-            $this->alert('Nemáte oprávnění ke smazání tohoto média.', '../views/media/List.php');
+            // nemate opravneni ke smazani tohoto media
+            $this->alert('Nemáte oprávnění ke smazání tohoto média.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
         }
-        // Delete media
+        // smazani media
         $stmt = $this->db->prepare('DELETE FROM media WHERE id = :id');
         $stmt->execute([':id' => $mediaId]);
-        $this->alert('Médium bylo úspěšně smazáno.', '../views/media/List.php');
+        // medium bylo uspesne smazano
+        $this->alert('Médium bylo úspěšně smazáno.', '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=list');
     }
 
     private function getFilterOptions() {
@@ -332,10 +346,7 @@ class MediaController {
     }
 
     private function alert($message, $redirectUrl) {
-        echo "<script>
-            alert('$message');
-            window.location.href = '$redirectUrl';
-        </script>";
+        echo "<script>\n alert('$message');\n window.location.href = '$redirectUrl';\n </script>";
         exit();
     }
 
@@ -345,12 +356,11 @@ class MediaController {
         $ratings = $stmt->fetchAll(PDO::FETCH_COLUMN);
         $ratings = array_filter($ratings, fn($r) => $r !== null && $r !== '');
         if (count($ratings) === 0) return null;
-        // Simple mean, or replace with weighted formula if you want
+        // jednoduche prumerovani, nebo zde muzete pouzit vahovany vzorec
         return round(array_sum($ratings) / count($ratings), 2);
     }
 }
 
-// Instantiate the controller and handle the action
 $controller = new MediaController();
 $controller->handleAction();
 ?>

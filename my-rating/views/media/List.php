@@ -23,6 +23,7 @@ include __DIR__ . '/../../public/navbar.php';
 </head>
 
 <body>
+    <?php include __DIR__ . '/../../public/navbar.php'; ?>
     <div class="main-wrapper">
 
         <div class="sidebar"></div>
@@ -138,79 +139,80 @@ include __DIR__ . '/../../public/navbar.php';
 
         <div class="sidebar"></div>
     </div>
+
+    <script>
+    (function() {
+        let selectMode = null;
+        const editBtn = document.getElementById('edit-mode-btn');
+        const deleteBtn = document.getElementById('delete-mode-btn');
+        const editBurger = document.getElementById('edit-mode-btn-burger');
+        const deleteBurger = document.getElementById('delete-mode-btn-burger');
+
+        function handleCardClick(e) {
+            if (!selectMode) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const link = e.currentTarget;
+            const url = new URL(link.href, window.location.origin);
+            const id = url.searchParams.get('id');
+            if (selectMode === 'edit' && id) {
+                window.location.href = '/WA-2025-KV-semestral_project/my-rating/views/media/Edit.php?id=' + encodeURIComponent(id);
+            } else if (selectMode === 'delete' && id) {
+                if (confirm('Opravdu chcete smazat toto médium?')) {
+                    window.location.href = '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=delete&id=' + encodeURIComponent(id);
+                }
+            }
+            setSelectMode(null);
+        }
+
+        function attachCardHandlers() {
+            document.querySelectorAll('.media-card-link').forEach(link => {
+                link.removeEventListener('click', handleCardClick, false);
+                if (selectMode === 'edit' || selectMode === 'delete') {
+                    link.addEventListener('click', handleCardClick, false);
+                }
+            });
+        }
+
+        function updateDeleteFilter() {
+            const isDeleteMode = document.body.classList.contains('select-delete-mode');
+            document.querySelectorAll('.media-card-link').forEach(link => {
+                const canDelete = link.getAttribute('data-can-delete') === '1';
+                if (isDeleteMode) {
+                    link.style.display = canDelete ? '' : 'none';
+                } else {
+                    link.style.display = '';
+                }
+            });
+        }
+
+        window.setSelectMode = function(mode) {
+            selectMode = mode;
+            document.body.classList.toggle('select-edit-mode', mode === 'edit');
+            document.body.classList.toggle('select-delete-mode', mode === 'delete');
+            attachCardHandlers();
+            updateDeleteFilter();
+        };
+
+        function handleEdit(e) {
+            e.preventDefault();
+            setSelectMode('edit');
+        }
+        function handleDelete(e) {
+            e.preventDefault();
+            setSelectMode('delete');
+        }
+        if (editBtn) editBtn.onclick = handleEdit;
+        if (deleteBtn) deleteBtn.onclick = handleDelete;
+        if (editBurger) editBurger.onclick = handleEdit;
+        if (deleteBurger) deleteBurger.onclick = handleDelete;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            attachCardHandlers();
+            updateDeleteFilter();
+        });
+    })();
+    </script>
 </body>
 
-<script>
-(function() {
-    let selectMode = null;
-    const editBtn = document.getElementById('edit-mode-btn');
-    const deleteBtn = document.getElementById('delete-mode-btn');
-    const editBurger = document.getElementById('edit-mode-btn-burger');
-    const deleteBurger = document.getElementById('delete-mode-btn-burger');
-
-    function handleCardClick(e) {
-        if (!selectMode) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        const link = e.currentTarget;
-        const url = new URL(link.href, window.location.origin);
-        const id = url.searchParams.get('id');
-        if (selectMode === 'edit' && id) {
-            window.location.href = '/WA-2025-KV-semestral_project/my-rating/views/media/Edit.php?id=' + encodeURIComponent(id);
-        } else if (selectMode === 'delete' && id) {
-            if (confirm('Opravdu chcete smazat toto médium?')) {
-                window.location.href = '/WA-2025-KV-semestral_project/my-rating/controllers/MediaController.php?action=delete&id=' + encodeURIComponent(id);
-            }
-        }
-        setSelectMode(null);
-    }
-
-    function attachCardHandlers() {
-        document.querySelectorAll('.media-card-link').forEach(link => {
-            link.removeEventListener('click', handleCardClick, false);
-            if (selectMode === 'edit' || selectMode === 'delete') {
-                link.addEventListener('click', handleCardClick, false);
-            }
-        });
-    }
-
-    function updateDeleteFilter() {
-        const isDeleteMode = document.body.classList.contains('select-delete-mode');
-        document.querySelectorAll('.media-card-link').forEach(link => {
-            const canDelete = link.getAttribute('data-can-delete') === '1';
-            if (isDeleteMode) {
-                link.style.display = canDelete ? '' : 'none';
-            } else {
-                link.style.display = '';
-            }
-        });
-    }
-
-    window.setSelectMode = function(mode) {
-        selectMode = mode;
-        document.body.classList.toggle('select-edit-mode', mode === 'edit');
-        document.body.classList.toggle('select-delete-mode', mode === 'delete');
-        attachCardHandlers();
-        updateDeleteFilter();
-    };
-
-    function handleEdit(e) {
-        e.preventDefault();
-        setSelectMode('edit');
-    }
-    function handleDelete(e) {
-        e.preventDefault();
-        setSelectMode('delete');
-    }
-    if (editBtn) editBtn.onclick = handleEdit;
-    if (deleteBtn) deleteBtn.onclick = handleDelete;
-    if (editBurger) editBurger.onclick = handleEdit;
-    if (deleteBurger) deleteBurger.onclick = handleDelete;
-
-    document.addEventListener('DOMContentLoaded', function() {
-        attachCardHandlers();
-        updateDeleteFilter();
-    });
-})();
-</script>
 </html>

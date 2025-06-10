@@ -59,11 +59,8 @@ class User {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function alert($message, $redirectUrl) {
-        echo "<script>
-            alert('$message');
-            window.location.href = '$redirectUrl';
-        </script>";
-        exit(); // Ensure no further code is executed
+    private function alert($message, $redirectUrl) {
+        echo "<script>\n alert('$message');\n window.location.href = '$redirectUrl';\n </script>";
+        exit();
     }
 }
