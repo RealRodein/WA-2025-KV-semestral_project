@@ -7,7 +7,6 @@ if (!isset($mediaList) || !isset($filterOptions)) {
     exit();
 }
 $navbarContext = 'list';
-include __DIR__ . '/../../public/navbar.php';
 ?>
 <!DOCTYPE html>
 <html lang="cs">
